@@ -56,14 +56,18 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 Pour démarrer le serveur, exécutez la commande suivante dans votre terminal :
 ```bash
 python server_pi.py
-
+```
 ## Tester les requête API avec :
 
 /start-wash
+```bash
 curl -X POST -H "Content-Type: application/json" -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\", \"duration\": 650}" http://localhost:5000/start-wash
-
+```
 /stop-wash
+```bash
 curl -X POST -H "Content-Type: application/json"  -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\"}" http://localhost:5000/stop-wash
-
+```
 /status
+```bash
 curl -X GET -H "Content-Type: application/json"  -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\"}" http://localhost:5000/status
+```
