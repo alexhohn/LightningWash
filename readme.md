@@ -8,7 +8,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 ---
 
-## ## Fonctionnalités ✨
+## Fonctionnalités ✨
 
 * **Serveur API Web** : Basé sur Python et Flask, il expose des endpoints pour contrôler et superviser le car wash.
 * **Gestion d'État Complète** : Le système gère plusieurs états (`idle`, `busy`, `maintenance`) pour éviter les conflits et assurer un fonctionnement robuste.
@@ -22,7 +22,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 ---
 
-## ## Prérequis 🛠️
+##  Prérequis 🛠️
 
 * **Python 3.7+**
 * **Librairie Flask** (`pip install Flask`)
@@ -30,7 +30,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 ---
 
-## ## Installation et Configuration
+## Installation et Configuration
 
 1.  **Clonez le projet ou copiez les fichiers** dans un dossier de votre choix.
     ```bash
@@ -51,8 +51,19 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 ---
 
-## ## Lancement du Serveur
+## Lancement du Serveur
 
 Pour démarrer le serveur, exécutez la commande suivante dans votre terminal :
 ```bash
 python server_pi.py
+
+## Tester les requête API avec :
+
+/start-wash
+curl -X POST -H "Content-Type: application/json" -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\", \"duration\": 650}" http://localhost:5000/start-wash
+
+/stop-wash
+curl -X POST -H "Content-Type: application/json"  -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\"}" http://localhost:5000/stop-wash
+
+/status
+curl -X GET -H "Content-Type: application/json"  -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\"}" http://localhost:5000/status
