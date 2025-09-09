@@ -34,7 +34,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 1.  **Clonez le projet ou copiez les fichiers** dans un dossier de votre choix.
     ```bash
-    git clone [URL_DE_VOTRE_FUTUR_REPO]
+    git clone https://github.com/alexhohn/LightningWash
     cd LightningWash
     ```
 2.  **Installez les dépendances** :
