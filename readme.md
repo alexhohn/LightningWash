@@ -57,8 +57,13 @@ Pour démarrer le serveur, exécutez la commande suivante dans votre terminal :
 ```bash
 python server_pi.py
 ```
-## Tester les requête API avec :
 
+
+## Tester les requête API avec :
+### Définir la clé secrète dans une variable d'environnement
+Quelle est la commande pour ajouter une variable d'environnement ?
+
+### Requêtes 
 /start-wash
 ```bash
 curl -X POST -H "Content-Type: application/json" -d "{\"secret\": \"VOTRE_SECRET_SUPER_UNIQUE_ICI\", \"duration\": 650}" http://localhost:5000/start-wash
