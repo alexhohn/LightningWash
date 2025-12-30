@@ -4,8 +4,6 @@
 
 Ce code a été développé pour permettre une simulation complète sur un ordinateur de développement (PC/Mac) avant son déploiement sur le matériel cible.
 
-
-
 ---
 
 ## Fonctionnalités ✨
@@ -19,6 +17,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 * **Simulation Matérielle** : Peut fonctionner sans le matériel Raspberry Pi grâce à un module de simulation (`mock_gpio.py`) pour un développement et des tests facilités.
 * **Détection d'Événements Externes** : Simule la détection d'un paiement externe (ex: monnayeur) via un fichier "capteur" pour synchroniser l'état de la machine.
 * **Sécurité** : Utilise une clé secrète simple pour sécuriser les endpoints qui déclenchent des actions.
+* **Intégration BTCPay Server** : Accepte les paiements via le Lightning Network en utilisant BTCPay Server et des webhooks pour démarrer/arrêter automatiquement le lavage.
 
 ---
 
@@ -26,6 +25,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 * **Python 3.7+**
 * **Librairie Flask** (`pip install Flask`)
+* **Librairie Requests** (`pip install requests`) - Pour le script de test BTCPay
 * **Sur un Raspberry Pi :** La librairie `RPi.GPIO` (`pip install RPi.GPIO`)
 
 ---
@@ -39,7 +39,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
     ```
 2.  **Installez les dépendances** :
     ```bash
-    pip install Flask
+    pip install Flask requests
     ```
 3.  **Configurez le script `server_pi.py`** :
     * Modifiez la variable `SECRET_KEY` pour y mettre une chaîne de caractères longue et aléatoire.
@@ -56,6 +56,40 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 Pour démarrer le serveur, exécutez la commande suivante dans votre terminal :
 ```bash
 python server_pi.py
+```
+
+## Intégration BTCPay Server ⚡
+
+LightningWash s'intègre avec BTCPay Server pour accepter les paiements Bitcoin via le Lightning Network. Cette intégration permet :
+
+1. De démarrer automatiquement un cycle de lavage lorsqu'un paiement est reçu
+2. D'arrêter le lavage si un remboursement est demandé
+3. De définir la durée du lavage en fonction du montant payé ou des métadonnées de la facture
+
+### Configuration
+
+Pour configurer l'intégration BTCPay Server :
+
+1. **Définissez les variables d'environnement** :
+   ```bash
+   export WASHING_MACHINE_SECRET="votre-secret-ici"
+   export BTCPAY_WEBHOOK_SECRET="votre-secret-webhook-ici"
+   ```
+
+2. **Configurez le webhook dans BTCPay Server** pour qu'il pointe vers votre endpoint `/btcpay-webhook`
+
+3. **Documentation détaillée** : Consultez [python/btcpay_webhook_setup.md](python/btcpay_webhook_setup.md) pour des instructions complètes sur la configuration.
+
+### Test de l'intégration
+
+Un script de test est fourni pour simuler des webhooks BTCPay Server sans avoir besoin d'une instance réelle :
+
+```bash
+# Simuler un paiement (démarrer un lavage de 120 secondes)
+python python/test_btcpay_webhook.py --event paid --duration 120
+
+# Simuler un remboursement (arrêter le lavage)
+python python/test_btcpay_webhook.py --event refunded --invoice-id "id-de-la-facture"
 ```
 
 
