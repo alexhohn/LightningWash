@@ -1,4 +1,4 @@
-# ⚡ LightningWash 🚗 (Vibecoded with Gemini)
+# ⚡ LightningWash 🚗
 
 **LightningWash** est le logiciel de contrôle pour un système de car wash automatisé acceptant les paiements via le Lightning Network de Bitcoin. Ce projet est conçu pour tourner sur un Raspberry Pi connecté physiquement au car wash, tout en offrant une API web pour le contrôle à distance.
 
