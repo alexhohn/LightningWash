@@ -1,0 +1,79 @@
+2026-01-03 12:18:03,353 - LightningWash - INFO - Using environment configuration for integrations
+2026-01-03 12:18:03,353 - LightningWash - INFO - Starting LightningWash...
+2026-01-03 12:18:03,353 - LightningWash - INFO - Webhook integration: Disabled
+2026-01-03 12:18:03,353 - LightningWash - INFO - Bitcoin Switch integration: Enabled
+2026-01-03 12:18:03,353 - LightningWash - INFO - Starting Flask server...
+2026-01-03 12:18:03,460 - LightningWash - INFO - [Flask] ⚠️  ATTENTION : Librairie RPi.GPIO non trouvée. Mode simulation activé.
+2026-01-03 12:18:03,460 - LightningWash - INFO - [Flask] Les commandes GPIO seront affichées dans la console.
+2026-01-03 12:18:03,460 - LightningWash - INFO - [Flask] SÉCURITÉ : Vous utilisez la clé secrète par défaut. Définissez la variable d'environnement WASHING_MACHINE_SECRET.
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] [MOCK_GPIO] Mode des broches réglé sur : 1
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] [MOCK_GPIO] Broche 17 configurée en mode 1
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] [MOCK_GPIO] BROCHE 17 : OFF (état LOW)
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] [MOCK_GPIO] Broche 18 configurée en mode 1
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] GPIO initialized: Relay pin=17, Maintenance switch pin=18
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] SÉCURITÉ : Vous utilisez la clé webhook par défaut. Définissez la variable d'environnement BTCPAY_WEBHOOK_SECRET.
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] BTCPay Server webhook integration is enabled
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] * Serving Flask app 'server_pi' (lazy loading)
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] * Environment: production
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] WARNING: This is a development server. Do not use it in a production deployment.
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] Use a production WSGI server instead.
+2026-01-03 12:18:03,461 - LightningWash - INFO - [Flask] * Debug mode: off
+2026-01-03 12:18:03,585 - LightningWash - INFO - [Flask] * Running on all addresses.
+2026-01-03 12:18:03,585 - LightningWash - INFO - [Flask] WARNING: This is a development server. Do not use it in a production deployment.
+2026-01-03 12:18:03,585 - LightningWash - INFO - [Flask] * Running on http://10.198.1.105:5000/ (Press CTRL+C to quit)
+2026-01-03 12:18:05,356 - LightningWash - INFO - Flask server started
+2026-01-03 12:18:05,356 - LightningWash - INFO - Starting Bitcoin Switch WebSocket client...
+2026-01-03 12:18:05,427 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,427 - BTCPaySwitch - INFO - Starting Bitcoin Switch WebSocket client
+2026-01-03 12:18:05,427 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,427 - BTCPaySwitch - INFO - WebSocket URL: ws://umbrel.local:3003/apps/32KCJgUTzUBBZD8GJprDxdGMSrXM/pos/bitcoinswitch
+2026-01-03 12:18:05,427 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,427 - BTCPaySwitch - INFO - Relay pin: 17
+2026-01-03 12:18:05,427 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,427 - BTCPaySwitch - INFO - Connecting to ws://umbrel.local:3003/apps/32KCJgUTzUBBZD8GJprDxdGMSrXM/pos/bitcoinswitch
+2026-01-03 12:18:05,679 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,679 - BTCPaySwitch - ERROR - WebSocket error: [Errno 65] No route to host
+2026-01-03 12:18:05,679 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,679 - BTCPaySwitch - WARNING - WebSocket connection closed: None - None
+2026-01-03 12:18:05,679 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:05,679 - BTCPaySwitch - INFO - Reconnecting in 5 seconds...
+2026-01-03 12:18:07,365 - LightningWash - INFO - WebSocket client started
+2026-01-03 12:18:07,365 - LightningWash - INFO - LightningWash started successfully
+2026-01-03 12:18:10,683 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:10,682 - BTCPaySwitch - INFO - Connecting to ws://umbrel.local:3003/apps/32KCJgUTzUBBZD8GJprDxdGMSrXM/pos/bitcoinswitch
+2026-01-03 12:18:10,754 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:10,754 - BTCPaySwitch - INFO - WebSocket connection established
+2026-01-03 12:18:41,906 - LightningWash - INFO - Shutting down LightningWash...
+2026-01-03 12:18:41,907 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:41,906 - BTCPaySwitch - INFO - Shutting down...
+2026-01-03 12:18:41,907 - LightningWash - INFO - Stopping Flask server...
+2026-01-03 12:18:41,911 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:41,911 - BTCPaySwitch - WARNING - WebSocket connection closed: None - None
+2026-01-03 12:18:41,911 - LightningWash - INFO - Stopping WebSocket client...
+2026-01-03 12:18:41,912 - LightningWash - INFO - [WebSocket] ⚠️  ATTENTION : Librairie RPi.GPIO non trouvée. Mode simulation activé.
+2026-01-03 12:18:41,912 - LightningWash - INFO - [WebSocket] Les commandes GPIO seront affichées dans la console.
+2026-01-03 12:18:41,912 - LightningWash - INFO - [WebSocket] SÉCURITÉ : Vous utilisez la clé secrète par défaut. Définissez la variable d'environnement WASHING_MACHINE_SECRET.
+2026-01-03 12:18:41,912 - LightningWash - INFO - [WebSocket] [MOCK_GPIO] Mode des broches réglé sur : 1
+2026-01-03 12:18:41,912 - LightningWash - INFO - [WebSocket] [MOCK_GPIO] Broche 17 configurée en mode 1
+2026-01-03 12:18:41,913 - LightningWash - INFO - [WebSocket] [MOCK_GPIO] BROCHE 17 : OFF (état LOW)
+2026-01-03 12:18:41,913 - LightningWash - INFO - [WebSocket] [MOCK_GPIO] Broche 18 configurée en mode 1
+2026-01-03 12:18:41,913 - LightningWash - INFO - [WebSocket] GPIO initialized: Relay pin=17, Maintenance switch pin=18
+2026-01-03 12:18:41,913 - LightningWash - INFO - [WebSocket] 2026-01-03 12:18:41,912 - BTCPaySwitch - INFO - Shutting down...
+2026-01-03 12:18:41,930 - LightningWash - INFO - Shutdown complete
+2026-01-03 12:18:54,499 - LightningWash - INFO - Using environment configuration for integrations
+2026-01-03 12:18:54,500 - LightningWash - INFO - Starting LightningWash...
+2026-01-03 12:18:54,500 - LightningWash - INFO - Webhook integration: Enabled
+2026-01-03 12:18:54,500 - LightningWash - INFO - Bitcoin Switch integration: Disabled
+2026-01-03 12:18:54,500 - LightningWash - INFO - Starting Flask server...
+2026-01-03 12:18:54,584 - LightningWash - INFO - [Flask] ⚠️  ATTENTION : Librairie RPi.GPIO non trouvée. Mode simulation activé.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] Les commandes GPIO seront affichées dans la console.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] SÉCURITÉ : Vous utilisez la clé secrète par défaut. Définissez la variable d'environnement WASHING_MACHINE_SECRET.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] [MOCK_GPIO] Mode des broches réglé sur : 1
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] [MOCK_GPIO] Broche 17 configurée en mode 1
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] [MOCK_GPIO] BROCHE 17 : OFF (état LOW)
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] [MOCK_GPIO] Broche 18 configurée en mode 1
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] GPIO initialized: Relay pin=17, Maintenance switch pin=18
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] SÉCURITÉ : Vous utilisez la clé webhook par défaut. Définissez la variable d'environnement BTCPAY_WEBHOOK_SECRET.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] BTCPay Server webhook integration is enabled
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] * Serving Flask app 'server_pi' (lazy loading)
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] * Environment: production
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] WARNING: This is a development server. Do not use it in a production deployment.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] Use a production WSGI server instead.
+2026-01-03 12:18:54,585 - LightningWash - INFO - [Flask] * Debug mode: off
+2026-01-03 12:18:54,593 - LightningWash - INFO - [Flask] * Running on all addresses.
+2026-01-03 12:18:54,593 - LightningWash - INFO - [Flask] WARNING: This is a development server. Do not use it in a production deployment.
+2026-01-03 12:18:54,594 - LightningWash - INFO - [Flask] * Running on http://10.198.1.105:5000/ (Press CTRL+C to quit)
+2026-01-03 12:18:56,506 - LightningWash - INFO - Flask server started
+2026-01-03 12:18:56,506 - LightningWash - INFO - LightningWash started successfully
+2026-01-03 12:19:38,353 - LightningWash - INFO - Shutting down LightningWash...
+2026-01-03 12:19:38,353 - LightningWash - INFO - Stopping Flask server...
+2026-01-03 12:19:38,357 - LightningWash - INFO - Shutdown complete

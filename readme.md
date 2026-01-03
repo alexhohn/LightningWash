@@ -39,7 +39,7 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
     ```
 2.  **Installez les dépendances** :
     ```bash
-    pip install Flask requests
+    pip install -r requirements.txt
     ```
 3.  **Configurez le script `server_pi.py`** :
     * Modifiez la variable `SECRET_KEY` pour y mettre une chaîne de caractères longue et aléatoire.
@@ -53,9 +53,29 @@ Ce code a été développé pour permettre une simulation complète sur un ordin
 
 ## Lancement du Serveur
 
-Pour démarrer le serveur, exécutez la commande suivante dans votre terminal :
+### Méthode standard (serveur Flask uniquement)
+
+Pour démarrer uniquement le serveur Flask avec l'intégration webhook, exécutez :
 ```bash
-python server_pi.py
+python python/server_pi.py
+```
+
+### Méthode flexible (avec le script launcher)
+
+Pour démarrer LightningWash avec des options flexibles, utilisez le script launcher :
+
+```bash
+# Démarrer avec les deux intégrations (webhook et Bitcoin Switch)
+python python/lightning_wash.py --all
+
+# Démarrer uniquement avec l'intégration webhook
+python python/lightning_wash.py --webhook
+
+# Démarrer uniquement avec l'intégration Bitcoin Switch
+python python/lightning_wash.py --bitcoinswitch
+
+# Démarrer avec la configuration définie par les variables d'environnement
+python python/lightning_wash.py
 ```
 
 ## Intégration BTCPay Server ⚡
@@ -66,21 +86,71 @@ LightningWash s'intègre avec BTCPay Server pour accepter les paiements Bitcoin 
 2. D'arrêter le lavage si un remboursement est demandé
 3. De définir la durée du lavage en fonction du montant payé ou des métadonnées de la facture
 
-### Configuration
+### Deux méthodes d'intégration
 
-Pour configurer l'intégration BTCPay Server :
+LightningWash propose deux méthodes d'intégration avec BTCPay Server :
 
+#### 1. Intégration par Webhook
+
+Cette méthode utilise les webhooks de BTCPay Server pour notifier LightningWash lorsqu'un paiement est reçu.
+
+**Avantages :**
+- Compatible avec toutes les versions de BTCPay Server
+- Permet une configuration détaillée des événements à surveiller
+
+**Configuration :**
 1. **Définissez les variables d'environnement** :
    ```bash
    export WASHING_MACHINE_SECRET="votre-secret-ici"
    export BTCPAY_WEBHOOK_SECRET="votre-secret-webhook-ici"
+   export ENABLE_WEBHOOK_INTEGRATION="true"
    ```
 
 2. **Configurez le webhook dans BTCPay Server** pour qu'il pointe vers votre endpoint `/btcpay-webhook`
 
-3. **Documentation détaillée** : Consultez [python/btcpay_webhook_setup.md](python/btcpay_webhook_setup.md) pour des instructions complètes sur la configuration.
+3. **Documentation détaillée** : Consultez [python/btcpay_webhook_setup.md](python/btcpay_webhook_setup.md) pour des instructions complètes.
 
-### Test de l'intégration
+#### 2. Intégration par Bitcoin Switch Plugin
+
+Cette méthode utilise le plugin Bitcoin Switch de BTCPay Server pour contrôler directement le relais via WebSocket.
+
+**Avantages :**
+- Configuration plus simple dans l'interface BTCPay Server
+- Communication en temps réel via WebSocket
+- Pas besoin de configurer des webhooks ou des signatures
+
+**Configuration :**
+1. **Définissez les variables d'environnement** :
+   ```bash
+   export WASHING_MACHINE_SECRET="votre-secret-ici"
+   export BTCPAY_WEBSOCKET_URL="wss://votre-btcpay-server.com/apps/APP_ID/pos/bitcoinswitch"
+   export ENABLE_BITCOINSWITCH_INTEGRATION="true"
+   ```
+
+2. **Installez et configurez le plugin Bitcoin Switch** dans votre BTCPay Server
+
+3. **Documentation détaillée** : Consultez [python/btcpay_switch_setup.md](python/btcpay_switch_setup.md) pour des instructions complètes.
+
+### Utilisation des deux méthodes simultanément
+
+LightningWash peut utiliser les deux méthodes d'intégration simultanément pour plus de flexibilité :
+
+```bash
+# Activer les deux méthodes d'intégration
+export ENABLE_WEBHOOK_INTEGRATION="true"
+export ENABLE_BITCOINSWITCH_INTEGRATION="true"
+
+# Démarrer LightningWash avec les deux intégrations
+python python/lightning_wash.py
+```
+
+Ou utilisez le script launcher avec l'option `--all` :
+
+```bash
+python python/lightning_wash.py --all
+```
+
+### Test de l'intégration Webhook
 
 Un script de test est fourni pour simuler des webhooks BTCPay Server sans avoir besoin d'une instance réelle :
 

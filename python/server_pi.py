@@ -1,60 +1,30 @@
 from flask import Flask, request, jsonify
 import time
-import threading
 import os
 import hmac
 import hashlib
 import json
 from functools import wraps
-from threading import Event 
 
-# --- Logique d'importation portable ---
-IS_RASPBERRY_PI = True
-try:
-    import RPi.GPIO as GPIO
-    print("✅ Librairie RPi.GPIO chargée. Mode Raspberry Pi activé.")
-except (ImportError, RuntimeError):
-    import mock_gpio as GPIO
-    IS_RASPBERRY_PI = False
-    print("⚠️  ATTENTION : Librairie RPi.GPIO non trouvée. Mode simulation activé.")
-    print("Les commandes GPIO seront affichées dans la console.")
+# Import our shared washing machine control module
+import washing_control
 
 
-# --- [IMPROVED] Configuration from Environment Variables ---
-# Load the secret key from an environment variable. If not set, use a default (unsafe) key.
-SECRET_KEY = os.environ.get("WASHING_MACHINE_SECRET", "default-unsafe-secret")
-if SECRET_KEY == "default-unsafe-secret":
-    print("SÉCURITÉ : Vous utilisez la clé secrète par défaut. Définissez la variable d'environnement WASHING_MACHINE_SECRET.")
-
+# --- Configuration from Environment Variables ---
 # BTCPay Server webhook configuration
 BTCPAY_WEBHOOK_SECRET = os.environ.get("BTCPAY_WEBHOOK_SECRET", "btcpay-webhook-secret")
 if BTCPAY_WEBHOOK_SECRET == "btcpay-webhook-secret":
     print("SÉCURITÉ : Vous utilisez la clé webhook par défaut. Définissez la variable d'environnement BTCPAY_WEBHOOK_SECRET.")
 
-# Define a reasonable maximum duration in seconds (e.g., 1 hour)
-MAX_WASH_DURATION = 1 * 60 * 60 
+# Enable/disable webhook integration
+ENABLE_WEBHOOK = os.environ.get("ENABLE_WEBHOOK_INTEGRATION", "true").lower() == "true"
 
-# Invoice tracking for refunds
-active_invoices = {}  # Store invoice_id -> {start_time, duration, etc.}
+# Get references to shared variables and functions
+SECRET_KEY = washing_control.SECRET_KEY
+MAX_WASH_DURATION = washing_control.MAX_WASH_DURATION
 
-# --- GPIO and App Setup ---
-RELAY_PIN = 17 
-MAINTENANCE_SWITCH_PIN = 18
-
+# Create Flask app
 app = Flask(__name__)
-
-# --- GESTION DE L'ÉTAT ---
-current_status = "idle"
-status_lock = threading.Lock()
-wash_end_time = None
-total_duration = 0
-stop_event = Event()
-
-# --- Configuration des broches GPIO ---
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RELAY_PIN, GPIO.OUT)
-GPIO.output(RELAY_PIN, GPIO.LOW)
-GPIO.setup(MAINTENANCE_SWITCH_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 
 # --- Authentication Decorator ---
@@ -133,178 +103,99 @@ def handle_invoice_paid(invoice_data):
         print(f"Invalid duration for invoice {invoice_id}: {duration_seconds}")
         return False
     
-    # Start the washing machine
-    payload = {
-        'secret': SECRET_KEY,
-        'duration': duration_seconds
-    }
-    
     # Track this invoice for potential refunds
-    active_invoices[invoice_id] = {
-        'start_time': time.time(),
-        'duration': duration_seconds
-    }
+    washing_control.track_invoice(invoice_id, duration_seconds)
     
-    # Call our existing start_wash function
-    with app.test_request_context(
-        '/start-wash',
-        method='POST',
-        json=payload
-    ):
-        response = start_wash()
-        success = isinstance(response, tuple) and response[1] == 200 if isinstance(response, tuple) else True
+    # Start the washing machine
+    success = washing_control.start_washing(duration_seconds)
+    
+    if success:
+        print(f"Washing machine started for invoice {invoice_id} with duration {duration_seconds}s")
+    else:
+        print(f"Failed to start washing machine for invoice {invoice_id}")
         
-        if success:
-            print(f"Washing machine started for invoice {invoice_id} with duration {duration_seconds}s")
-        else:
-            print(f"Failed to start washing machine for invoice {invoice_id}")
-            
-        return success
+    return success
 
 
 def handle_invoice_refunded(invoice_data):
     """Handle a refunded invoice by stopping the washing machine."""
     invoice_id = invoice_data.get('invoice_id', '')
     
-    if invoice_id not in active_invoices:
+    if invoice_id not in washing_control.active_invoices:
         print(f"Invoice {invoice_id} not found in active invoices")
         return False
     
     # Stop the washing machine
-    payload = {
-        'secret': SECRET_KEY
-    }
+    success = washing_control.stop_washing()
     
-    # Call our existing stop_wash function
-    with app.test_request_context(
-        '/stop-wash',
-        method='POST',
-        json=payload
-    ):
-        response = stop_wash()
-        success = isinstance(response, tuple) and response[1] == 200 if isinstance(response, tuple) else True
+    if success:
+        print(f"Washing machine stopped for refunded invoice {invoice_id}")
+        # Remove from active invoices
+        washing_control.remove_invoice(invoice_id)
+    else:
+        print(f"Failed to stop washing machine for refunded invoice {invoice_id}")
         
-        if success:
-            print(f"Washing machine stopped for refunded invoice {invoice_id}")
-            # Remove from active invoices
-            if invoice_id in active_invoices:
-                del active_invoices[invoice_id]
-        else:
-            print(f"Failed to stop washing machine for refunded invoice {invoice_id}")
-            
-        return success
-
-
-# --- Fonctions existantes lit l'état de de l'interrupteur manuel ---
-def read_external_sensor():
-    """Lit le fichier qui simule notre capteur externe (monnayeur)."""
-    try:
-        with open("external_status.txt", "r") as f:
-            return f.read().strip().upper()
-    except FileNotFoundError:
-        return "OFF"
-
-def wash_cycle(duration):
-    global current_status, status_lock, wash_end_time, total_duration, stop_event
-    print(f"Cycle de lavage démarré pour {duration} secondes.")
-    
-    try:
-        GPIO.output(RELAY_PIN, GPIO.HIGH)
-        was_stopped = stop_event.wait(timeout=duration)
-        if was_stopped:
-            print("Le lavage a ete arrete manuellement avant la fin.")
-        else:
-            print("Lavage termine normalement.")
-    finally:
-        # Ensure the relay is always turned off.
-        GPIO.output(RELAY_PIN, GPIO.LOW)
-        # Reset state
-        with status_lock:
-            current_status = "idle"
-            wash_end_time = None
-            total_duration = 0
-        print("Statut repassé à 'idle'.")
+    return success
 
 # --- Endpoints ---
 
 @app.route('/status', methods=['GET'])
 def get_status():
-    external_state = read_external_sensor()
-    
-    with status_lock:
-        if current_status == "busy" or external_state == "ON":
-            remaining_time = 0
-            if wash_end_time is not None:
-                remaining_time = max(0, round(wash_end_time - time.time()))
-
-            return jsonify({
-                "status": "busy", 
-                "remaining_time": remaining_time,
-                "total_duration": total_duration
-            })
-    
-    return jsonify({"status": "idle"})
+    status_data = washing_control.get_status()
+    return jsonify(status_data)
 
 @app.route('/start-wash', methods=['POST'])
-@require_secret  # [IMPROVED] Using the decorator for authentication
+@require_secret
 def start_wash():
-    global current_status, status_lock, wash_end_time, total_duration, stop_event
+    data = request.json  # We know this exists because the decorator checked it
+    duration_seconds = data.get('duration', 0)
     
-    external_state = read_external_sensor()
-    data = request.json # We know this exists because the decorator checked it
-
-    with status_lock:
-        if current_status != "idle" or external_state == "ON":
-            return jsonify({"error": "Lavage deja en cours d'utilisation"}), 409
-
-        duration_seconds = data.get('duration', 0)
-        
-        # [IMPROVED] Input validation for duration
-        if not isinstance(duration_seconds, int) or not (0 < duration_seconds <= MAX_WASH_DURATION):
-            return jsonify({"error": f"Duree invalide. Doit etre un nombre entier entre 1 et {MAX_WASH_DURATION} secondes."}), 400
-
-        stop_event.clear()
-        current_status = "busy"     
-        wash_end_time = time.time() + duration_seconds
-        total_duration = duration_seconds
-        
-        print(f"Machine verrouillée. Lavage de {duration_seconds}s. Fin prévue à {wash_end_time}.")
-        
-        wash_thread = threading.Thread(target=wash_cycle, args=(duration_seconds,))
-        wash_thread.start()
-
+    # Input validation for duration
+    if not isinstance(duration_seconds, int) or not (0 < duration_seconds <= MAX_WASH_DURATION):
+        return jsonify({"error": f"Duree invalide. Doit etre un nombre entier entre 1 et {MAX_WASH_DURATION} secondes."}), 400
+    
+    success = washing_control.start_washing(duration_seconds)
+    
+    if success:
         return jsonify({"status": "Lavage démarre"})
+    else:
+        return jsonify({"error": "Lavage deja en cours d'utilisation"}), 409
 
-#Fonction à dev pour ajouter du temps à un lavage déjà en cours.
-""" 
 @app.route('/add-time', methods=['POST'])
-# Is machine busy ? 2. Is it runing or in maintenance ? 3. If runing add time to the timer corresponding to the time paid.
-@require_secret # [IMPROVED] This endpoint is now protected!
+@require_secret
 def add_time():
-        global current_status, status_lock, wash_end_time, total_duration, stop_event
-        external_state = read_external_sensor()
-
-        if current_status == "busy" :
-            stop_event.set() 
-"""
-
+    """Add time to a running washing machine."""
+    data = request.json  # We know this exists because the decorator checked it
+    duration_seconds = data.get('duration', 0)
+    
+    # Input validation for duration
+    if not isinstance(duration_seconds, int) or not (0 < duration_seconds <= MAX_WASH_DURATION):
+        return jsonify({"error": f"Duree invalide. Doit etre un nombre entier entre 1 et {MAX_WASH_DURATION} secondes."}), 400
+    
+    success = washing_control.add_washing_time(duration_seconds)
+    
+    if success:
+        return jsonify({"status": "Temps ajouté au lavage en cours"})
+    else:
+        return jsonify({"error": "Aucun lavage en cours pour ajouter du temps"}), 404
 
 @app.route('/stop-wash', methods=['POST'])
-@require_secret # [IMPROVED] This endpoint is now protected!
+@require_secret
 def stop_wash():
-    global stop_event
+    success = washing_control.stop_washing()
     
-    if current_status == "busy":
-        print("🔴 Ordre d'arrêt d'urgence reçu !")
-        stop_event.set()
+    if success:
         return jsonify({"status": "Signal d'arrêt envoyé"})
-        
-    return jsonify({"status": "Aucun lavage en cours a arreter"}), 404
+    else:
+        return jsonify({"status": "Aucun lavage en cours a arreter"}), 404
 
 
 @app.route('/btcpay-webhook', methods=['POST'])
 def btcpay_webhook():
     """Handle webhook notifications from BTCPay Server."""
+    if not ENABLE_WEBHOOK:
+        return jsonify({"error": "Webhook integration is disabled"}), 503
+    
     # Get the raw request data for signature verification
     request_data = request.get_data()
     
@@ -357,5 +248,11 @@ def btcpay_webhook():
 
 
 if __name__ == '__main__':
+    # Print integration status
+    if ENABLE_WEBHOOK:
+        print("BTCPay Server webhook integration is enabled")
+    else:
+        print("BTCPay Server webhook integration is disabled")
+    
     # This part is for development only!
     app.run(host='0.0.0.0', port=5000)
